@@ -1,0 +1,30 @@
+# Honeypot SIEM — Compose override
+# =================================
+# Copy this file into the cloned  wazuh-docker/single-node/  directory.
+# Docker Compose automatically merges docker-compose.override.yml on top of
+# the official docker-compose.yml, so a plain `docker compose up -d` brings up
+# the full Wazuh stack PLUS Cowrie, with logs and custom rules wired in.
+#
+# Relative paths (../../) are resolved from wazuh-docker/single-node/ and point
+# back to this repo's  cowrie/  and  rules/  folders.
+
+services:
+
+  # --- Cowrie SSH honeypot -------------------------------------------------
+  cowrie:
+    image: cowrie/cowrie:latest
+    container_name: cowrie
+    restart: unless-stopped
+    ports:
+      - "2222:2222"          # host:container — attack this from your "attacker" box
+    volumes:
+      - ../../cowrie/log:/cowrie/cowrie-git/var/log/cowrie
+      - ../../cowrie/etc/cowrie.cfg:/cowrie/cowrie-git/etc/cowrie.cfg:ro
+      - ../../cowrie/etc/userdb.txt:/cowrie/cowrie-git/etc/userdb.txt:ro
+
+  # --- Extend the Wazuh manager to ingest Cowrie + load our rules ----------
+  wazuh.manager:
+    volumes:
+      - ../../cowrie/log:/var/log/cowrie:ro
+      - ../../rules/local_rules.xml:/var/ossec/etc/rules/local_rules.xml
+      - ../../rules/local_decoder.xml:/var/ossec/etc/decoders/local_decoder.xml

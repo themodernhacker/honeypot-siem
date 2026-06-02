@@ -1,0 +1,27 @@
+# --- Honeypot SIEM lab ---
+
+# Captured honeypot logs (can contain attacker IPs / payloads; regenerate locally)
+cowrie/log/
+cowrie-logs/
+*.json.log
+
+# Wazuh stack pulled in during setup (cloned, not committed)
+wazuh-docker/
+
+# Generated TLS certs / secrets
+config/certs/
+*.pem
+*.key
+*.crt
+.env
+
+# OS / editor noise
+Thumbs.db
+Desktop.ini
+.DS_Store
+*.swp
+.idea/
+.vscode/
+
+# Keep the screenshots folder but ignore nothing inside (we DO commit screenshots)
+!screenshots/

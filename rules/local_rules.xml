@@ -1,0 +1,136 @@
+<!--
+  Cowrie SSH Honeypot — Detection Rules for Wazuh
+  ===============================================
+  Custom rule IDs use the 100100–100199 range (Wazuh reserves <100000 for
+  built-in rules). Each detection is mapped to a MITRE ATT&CK technique via
+  the <mitre> block so alerts are tagged in the dashboard.
+
+  Field source: Cowrie JSON, auto-parsed by Wazuh's json decoder.
+  Install: copy this file into the manager at
+           /var/ossec/etc/rules/local_rules.xml  then restart wazuh-manager.
+
+  Author: <your name>  |  Project: Honeypot SIEM Lab
+-->
+
+<group name="cowrie,honeypot,">
+
+  <!-- ===== Base rule: any Cowrie event (silent parent, level 0) ===== -->
+  <rule id="100100" level="0">
+    <decoded_as>json</decoded_as>
+    <field name="eventid">^cowrie\.</field>
+    <description>Cowrie honeypot event.</description>
+  </rule>
+
+  <!-- ===== Connection / session ===== -->
+  <rule id="100101" level="3">
+    <if_sid>100100</if_sid>
+    <field name="eventid">^cowrie\.session\.connect$</field>
+    <description>Cowrie: new connection to SSH honeypot from $(src_ip).</description>
+    <mitre>
+      <id>T1021.004</id>   <!-- Remote Services: SSH -->
+    </mitre>
+  </rule>
+
+  <!-- ===== Authentication ===== -->
+  <rule id="100102" level="5">
+    <if_sid>100100</if_sid>
+    <field name="eventid">^cowrie\.login\.failed$</field>
+    <description>Cowrie: failed SSH login [$(username)/$(password)] from $(src_ip).</description>
+    <mitre>
+      <id>T1110</id>       <!-- Brute Force -->
+    </mitre>
+  </rule>
+
+  <rule id="100103" level="6">
+    <if_sid>100100</if_sid>
+    <field name="eventid">^cowrie\.login\.success$</field>
+    <description>Cowrie: SUCCESSFUL SSH login [$(username)/$(password)] from $(src_ip).</description>
+    <mitre>
+      <id>T1078</id>       <!-- Valid Accounts -->
+    </mitre>
+  </rule>
+
+  <!-- ===== Correlation: brute force (many failures, one source) ===== -->
+  <rule id="100104" level="10" frequency="8" timeframe="120">
+    <if_matched_sid>100102</if_matched_sid>
+    <same_source_ip />
+    <description>Cowrie: SSH brute-force — 8+ failed logins from $(src_ip) in 120s.</description>
+    <mitre>
+      <id>T1110</id>       <!-- Brute Force -->
+    </mitre>
+  </rule>
+
+  <!-- ===== Correlation: success right after brute force (account compromise) ===== -->
+  <rule id="100105" level="12">
+    <if_sid>100103</if_sid>
+    <if_matched_sid>100104</if_matched_sid>
+    <same_source_ip />
+    <description>Cowrie: successful login from $(src_ip) AFTER brute-force — likely valid-account compromise.</description>
+    <mitre>
+      <id>T1078</id>       <!-- Valid Accounts -->
+      <id>T1110</id>       <!-- Brute Force -->
+    </mitre>
+  </rule>
+
+  <!-- ===== Post-exploitation: commands run inside the honeypot ===== -->
+  <rule id="100106" level="5">
+    <if_sid>100100</if_sid>
+    <field name="eventid">^cowrie\.command\.input$</field>
+    <description>Cowrie: command executed in honeypot session: $(input)</description>
+    <mitre>
+      <id>T1059.004</id>   <!-- Command and Scripting Interpreter: Unix Shell -->
+    </mitre>
+  </rule>
+
+  <!-- ===== Recon / discovery commands ===== -->
+  <rule id="100107" level="8">
+    <if_sid>100106</if_sid>
+    <field name="input" type="pcre2">(?i)\b(uname|whoami|id|hostname|lscpu|uptime|ifconfig|ip\s+a|netstat|ps\b|cat\s+/etc/(passwd|shadow|os-release))\b</field>
+    <description>Cowrie: system/recon command observed: $(input)</description>
+    <mitre>
+      <id>T1082</id>       <!-- System Information Discovery -->
+      <id>T1033</id>       <!-- System Owner/User Discovery -->
+    </mitre>
+  </rule>
+
+  <!-- ===== Payload download via command (wget/curl/...) ===== -->
+  <rule id="100108" level="10">
+    <if_sid>100106</if_sid>
+    <field name="input" type="pcre2">(?i)\b(wget|curl|tftp|ftpget|scp|fetch)\b</field>
+    <description>Cowrie: remote payload download attempt: $(input)</description>
+    <mitre>
+      <id>T1105</id>       <!-- Ingress Tool Transfer -->
+    </mitre>
+  </rule>
+
+  <!-- ===== Cowrie actually fetched a file (download event) ===== -->
+  <rule id="100109" level="10">
+    <if_sid>100100</if_sid>
+    <field name="eventid">^cowrie\.session\.file_download$</field>
+    <description>Cowrie: file downloaded into honeypot from $(url)</description>
+    <mitre>
+      <id>T1105</id>       <!-- Ingress Tool Transfer -->
+    </mitre>
+  </rule>
+
+  <!-- ===== Rapid repeated connections (automation / scanning) ===== -->
+  <rule id="100110" level="7" frequency="12" timeframe="60">
+    <if_matched_sid>100101</if_matched_sid>
+    <same_source_ip />
+    <description>Cowrie: 12+ rapid connections from $(src_ip) in 60s — possible scan/automation.</description>
+    <mitre>
+      <id>T1046</id>       <!-- Network Service Discovery -->
+    </mitre>
+  </rule>
+
+  <!-- ===== Honeypot abused as a pivot/tunnel ===== -->
+  <rule id="100111" level="9">
+    <if_sid>100100</if_sid>
+    <field name="eventid">^cowrie\.direct-tcpip\.request$</field>
+    <description>Cowrie: attacker attempted to tunnel/proxy through honeypot from $(src_ip).</description>
+    <mitre>
+      <id>T1090</id>       <!-- Proxy -->
+    </mitre>
+  </rule>
+
+</group>

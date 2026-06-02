@@ -1,0 +1,15 @@
+<!--
+  Add this block to the Wazuh manager's ossec.conf so it ingests Cowrie's
+  JSON log. In the cloned repo the file to edit is:
+
+      wazuh-docker/single-node/config/wazuh_cluster/wazuh_manager.conf
+
+  Paste the <localfile> block inside the existing <ossec_config> ... </ossec_config>
+  element (anywhere among the other <localfile> entries), then recreate the
+  manager:  docker compose up -d --force-recreate wazuh.manager
+-->
+
+<localfile>
+  <log_format>json</log_format>
+  <location>/var/log/cowrie/cowrie.json</location>
+</localfile>
