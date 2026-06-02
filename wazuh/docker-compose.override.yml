@@ -3,10 +3,16 @@
 # Copy this file into the cloned  wazuh-docker/single-node/  directory.
 # Docker Compose automatically merges docker-compose.override.yml on top of
 # the official docker-compose.yml, so a plain `docker compose up -d` brings up
-# the full Wazuh stack PLUS Cowrie, with logs and custom rules wired in.
+# the full Wazuh stack PLUS Cowrie, with the honeypot log wired into the manager.
 #
 # Relative paths (../../) are resolved from wazuh-docker/single-node/ and point
-# back to this repo's  cowrie/  and  rules/  folders.
+# back to this repo's  cowrie/  folder.
+#
+# NOTE: custom detection rules are NOT bind-mounted here. /var/ossec/etc is a
+# named volume that Wazuh only initialises when it looks empty; bind-mounting
+# files into it makes Docker pre-create dirs, Wazuh then skips its default-config
+# copy, and the manager fails to start. Instead the rules are injected after the
+# stack is healthy by  apply-custom-rules.ps1  (a one-time, persistent step).
 
 services:
 
@@ -22,9 +28,8 @@ services:
       - ../../cowrie/etc/cowrie.cfg:/cowrie/cowrie-git/etc/cowrie.cfg:ro
       - ../../cowrie/etc/userdb.txt:/cowrie/cowrie-git/etc/userdb.txt:ro
 
-  # --- Extend the Wazuh manager to ingest Cowrie + load our rules ----------
+  # --- Share Cowrie's log into the manager so it can ingest cowrie.json ----
+  # (/var/log/cowrie is NOT under the /var/ossec/etc volume, so this is safe)
   wazuh.manager:
     volumes:
       - ../../cowrie/log:/var/log/cowrie:ro
-      - ../../rules/local_rules.xml:/var/ossec/etc/rules/local_rules.xml
-      - ../../rules/local_decoder.xml:/var/ossec/etc/decoders/local_decoder.xml

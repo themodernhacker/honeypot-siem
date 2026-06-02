@@ -1,7 +1,10 @@
-# Cowrie user database — controls which SSH logins succeed vs. fail.
+# Cowrie user database - controls which SSH logins succeed vs. fail.
+# IMPORTANT: keep this file pure ASCII. Cowrie reads it with the ascii codec
+# and will crash on any non-ASCII byte (e.g. a smart dash or quote).
+#
 # Format:  username:x:password    (a leading ! denies; * matches anything)
 # First matching line wins. Lines below have no trailing '*', so any password
-# not explicitly allowed will FAIL — giving us deterministic brute-force demos.
+# not explicitly allowed will FAIL - giving us deterministic brute-force demos.
 #
 # Result for this lab:
 #   root + any of the denied passwords below  -> login.failed  (feeds rule 100104)

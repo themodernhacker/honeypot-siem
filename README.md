@@ -54,6 +54,7 @@ copy ..\..\wazuh\docker-compose.override.yml .\docker-compose.override.yml
 # add the <localfile> block from wazuh/manager-localfile-snippet.xml to
 #   config\wazuh_cluster\wazuh_manager.conf
 docker compose up -d
+pwsh ..\..\wazuh\apply-custom-rules.ps1   # inject custom rules once stack is healthy
 # open https://localhost  (change the default admin password!)
 ```
 
@@ -106,9 +107,26 @@ analyst does next) lives in [`docs/`](docs):
 
 ## What I learned
 
-_(Fill this in as you build — 4–6 bullets on what was genuinely new: e.g. Wazuh
-rule frequency/correlation syntax, JSON decoding, mapping telemetry to ATT&CK,
-the limits of honeypot-only network detection.)_
+Real engineering problems I hit and solved while building this (not theory):
+
+- **Wazuh correlation uses specific field names.** `<same_source_ip/>` only works
+  on Wazuh's built-in `srcip` field. Cowrie's JSON decodes the address as the
+  dynamic field `src_ip`, so my brute-force correlation silently never fired
+  until I switched to `<same_field>src_ip</same_field>`. Lesson: verify which
+  field your correlation actually keys on.
+- **Bind-mounting into a Docker named volume can break app init.** Mounting rule
+  files into `/var/ossec/etc` made Wazuh think the volume was already populated
+  and skip copying its default config, so the manager wouldn't start. Fixed by
+  injecting rules *after* first boot via `docker cp` (see `apply-custom-rules.ps1`).
+- **Honeypot detection has blind spots.** Cowrie only exposes port 2222, so a
+  port-scan (T1046) leaves weak evidence on the honeypot itself — the strong
+  signal is on the attacker/network side. I represented this honestly rather
+  than overstating coverage.
+- **Config encoding matters.** Cowrie reads `userdb.txt` as ASCII and crashed on
+  a single non-ASCII dash in a comment, which broke all authentication. Small
+  byte, big outage — exactly the kind of thing real detection pipelines hit.
+- Mapping each detection to MITRE ATT&CK turns a pile of alerts into a readable
+  attack story (recon → brute force → compromise → discovery → tool transfer).
 
 ---
 

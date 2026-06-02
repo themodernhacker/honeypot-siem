@@ -39,7 +39,7 @@ cd wazuh-docker\single-node
 docker compose -f generate-indexer-certs.yml run --rm generator
 ```
 
-Now wire in our honeypot + rules **before** the first boot:
+Now wire in the honeypot **before** the first boot:
 
 ```powershell
 # From wazuh-docker\single-node :
@@ -56,6 +56,21 @@ Bring it all up:
 ```powershell
 docker compose up -d
 docker compose ps
+```
+
+> **Why custom rules are NOT bind-mounted.** `/var/ossec/etc` is a named volume
+> that Wazuh only populates with its default config when the volume looks empty.
+> Bind-mounting individual rule files into it makes Docker pre-create those
+> directories, Wazuh then skips its default-config copy, and the manager fails
+> to start (missing `etc/shared/ar.conf`). So we inject the rules *after* the
+> stack is healthy instead — see below.
+
+Wait until the manager is initialised (analysisd running), then load the custom
+Cowrie rules. They land in the named volume and persist across restarts:
+
+```powershell
+# From the repo root:
+pwsh wazuh\apply-custom-rules.ps1
 ```
 
 - Wait ~2–3 min, then open **https://localhost** (port 443).
