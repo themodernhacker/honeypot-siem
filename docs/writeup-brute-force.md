@@ -1,53 +1,78 @@
-# Write-up: SSH Brute Force → Account Compromise
+# Brute force into an account takeover
 
-> Template write-up. Replace the _[screenshot]_ placeholders and the example IP
-> with your real captured data after running Phase 4. Aim for ~1 page.
+## What happened
 
-## Summary
+An attacker hammered the SSH honeypot with one bad password after another, all
+against the `root` account, and then walked straight in once a password finally
+worked. This is the most common thing you see hitting any box exposed to the
+internet, so it was the first scenario I wanted the lab to catch cleanly.
 
-An attacker (here, my own `brute_force.py` against the lab) repeatedly attempts
-to log into the SSH honeypot, fails many times, then succeeds with a guessed
-credential — the classic credential-access → initial-access chain.
+In my test run the source was `172.18.0.6` and it tried ten passwords in a few
+seconds: admin, password, 123456, 12345, root, toor, qwerty, letmein, changeme,
+000000. Every one failed. The eleventh attempt used `hunter2` and that one
+landed.
 
-## The telemetry
+## What the honeypot recorded
 
-Cowrie logged the attempt as JSON. Representative failed-login event:
+Cowrie writes every attempt as a line of JSON. Here is one of the failures
+straight from `cowrie.json`:
 
 ```json
-{"eventid":"cowrie.login.failed","username":"root","password":"123456",
- "src_ip":"172.18.0.1","message":"login attempt [root/123456] failed", ...}
+{"eventid":"cowrie.login.failed","username":"root","password":"letmein",
+ "src_ip":"172.18.0.6","message":"login attempt [root/letmein] failed", ...}
 ```
 
-_[screenshot: cowrie.json failures]_
+_[screenshot: a handful of failed attempts in cowrie.json]_
 
-## The detection
+## How Wazuh caught it
 
-Wazuh's frequency rule correlates the burst:
+Two rules do the work here. The first one flags every single failed login
+(rule 100102). On its own that is noisy and not very interesting, so the second
+rule watches for a pile of those failures from the same address in a short
+window:
 
 ```xml
 <rule id="100104" level="10" frequency="8" timeframe="120">
   <if_matched_sid>100102</if_matched_sid>
-  <same_source_ip />
-  <description>Cowrie: SSH brute-force — 8+ failed logins from $(src_ip) in 120s.</description>
+  <same_field>src_ip</same_field>
+  <description>Cowrie: SSH brute-force, 8 or more failed logins from $(src_ip) within 120s.</description>
   <mitre><id>T1110</id></mitre>
 </rule>
 ```
 
-When a login then succeeds from the same IP, rule **100105** escalates it to a
-level-12 "valid-account compromise" alert (T1078 + T1110).
+One thing that bit me while building this: I first wrote it with
+`<same_source_ip/>`, which is the obvious choice, but it never fired. Cowrie's
+JSON puts the address in a field called `src_ip`, while `same_source_ip` only
+looks at Wazuh's own `srcip` field. Once I switched to
+`<same_field>src_ip</same_field>` the correlation started working. Worth
+remembering that the field name your correlation keys on actually matters.
 
-_[screenshot: Wazuh alert 100104 + 100105 with MITRE tags]_
+The bigger moment is the login that succeeds right after all that noise. That is
+rule 100105, and it only fires when a success comes from the same address that
+just got flagged for brute forcing. It sits at level 12, the loudest alert in
+the whole lab, because a successful login on the back of a brute force is the
+point where a guess turns into a real foothold:
+
+```
+20:27:45  rule 100104  level 10  brute-force from 172.18.0.6           T1110
+20:27:47  rule 100105  level 12  successful login root/hunter2 after   T1078, T1110
+```
+
+_[screenshot: 100104 and 100105 side by side in the Wazuh alerts view]_
 
 ## MITRE ATT&CK
 
-- **T1110 — Brute Force** (Credential Access)
-- **T1078 — Valid Accounts** (Initial Access)
+- T1110 Brute Force (the failed login flood)
+- T1078 Valid Accounts (logging in with a credential that now works)
 
-## What a real analyst would do next
+## What I would do next as an analyst
 
-1. Confirm whether the source IP is internal or external; check threat intel.
-2. Determine if the targeted account exists on real assets and whether the
-   guessed password is in use anywhere → force a reset.
-3. Hunt for the same source IP across other logs (lateral movement, VPN, web).
-4. Recommend controls: rate-limiting / fail2ban, key-only SSH, MFA, and a
-   detection for "success immediately after N failures" (exactly rule 100105).
+First thing is to figure out if the account and password are real anywhere. In
+the lab `root/hunter2` is fake, but on a real estate the question is whether
+that password is in use on any production host, and if so it gets reset right
+away. After that I would pivot on the source address and look for it in
+everything else: VPN logs, web logs, other SSH servers, to see if the same
+attacker tried other doors. Then the prevention conversation: kill password
+auth on SSH and move to keys, put the box behind something that rate limits
+repeated failures, and keep the level 12 "success straight after a failure
+burst" alert because that pattern is the one you never want to miss.

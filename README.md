@@ -100,8 +100,9 @@ Full table: [`docs/MITRE-MAPPING.md`](docs/MITRE-MAPPING.md).
 Attack-by-attack analysis (log → rule that caught it → MITRE technique → what an
 analyst does next) lives in [`docs/`](docs):
 
-- [Brute force → account compromise](docs/writeup-brute-force.md)
-- _(add 1–2 more)_
+- [Brute force into an account takeover](docs/writeup-brute-force.md)
+- [Looking around after getting in](docs/writeup-recon.md)
+- [Pulling down a second stage](docs/writeup-payload-download.md)
 
 ---
 

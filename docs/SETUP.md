@@ -142,8 +142,19 @@ command activity (rules 100106–100108).
 ## Phase 5 — Detection engineering + MITRE
 
 The rules already map to MITRE (see [`MITRE-MAPPING.md`](MITRE-MAPPING.md)).
-Build dashboard panels: top source IPs, top usernames/passwords, commands run,
-alerts over time. 📸 Screenshot each → `screenshots/05-*.png`.
+Instead of building panels by hand, import the ready-made dashboard:
+
+```powershell
+curl -k -u admin:SecretPassword -H "osd-xsrf: true" `
+  -X POST "https://localhost/api/saved_objects/_import?overwrite=true" `
+  --form file=@wazuh\dashboard\cowrie-dashboard.ndjson
+```
+
+That loads the **"Honeypot SIEM - Cowrie overview"** dashboard with panels for
+top source IPs, top usernames/passwords, commands run, alerts over time, and a
+MITRE technique breakdown. See [`wazuh/dashboard/README.md`](../wazuh/dashboard/README.md)
+for the UI import path and how to rebuild it. Screenshot each panel into
+`screenshots/05-*.png`.
 
 **Done when:** Each alert is tagged with a technique and the dashboard is built.
 
