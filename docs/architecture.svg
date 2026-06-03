@@ -1,0 +1,101 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1100" height="640" viewBox="0 0 1100 640" font-family="Segoe UI, Helvetica, Arial, sans-serif">
+  <defs>
+    <marker id="arrow" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto" markerUnits="strokeWidth">
+      <path d="M0,0 L8,3 L0,6 Z" fill="#5b6470"/>
+    </marker>
+    <filter id="shadow" x="-10%" y="-10%" width="120%" height="130%">
+      <feDropShadow dx="0" dy="2" stdDeviation="3" flood-color="#000000" flood-opacity="0.12"/>
+    </filter>
+  </defs>
+
+  <!-- background -->
+  <rect x="0" y="0" width="1100" height="640" fill="#f7f9fb"/>
+
+  <!-- title -->
+  <text x="40" y="46" font-size="26" font-weight="700" fill="#1b2733">Honeypot SIEM Lab Architecture</text>
+  <text x="40" y="72" font-size="15" fill="#5b6470">Cowrie SSH honeypot feeding a Wazuh SIEM, all in Docker on one host. Attacks come from a controlled attacker box.</text>
+
+  <!-- ============ Attacker ============ -->
+  <g filter="url(#shadow)">
+    <rect x="40" y="250" width="180" height="120" rx="12" fill="#ffffff" stroke="#d64550" stroke-width="2"/>
+  </g>
+  <text x="130" y="285" text-anchor="middle" font-size="16" font-weight="700" fill="#d64550">Attacker</text>
+  <text x="130" y="312" text-anchor="middle" font-size="12.5" fill="#3d4753">brute_force.py</text>
+  <text x="130" y="332" text-anchor="middle" font-size="12.5" fill="#3d4753">run_session.py</text>
+  <text x="130" y="352" text-anchor="middle" font-size="12.5" fill="#3d4753">nmap / ssh</text>
+
+  <!-- ============ Docker boundary ============ -->
+  <rect x="300" y="110" width="760" height="470" rx="16" fill="#eef4fb" stroke="#9cc3ec" stroke-width="1.5" stroke-dasharray="6 5"/>
+  <text x="324" y="138" font-size="14" font-weight="700" fill="#2e6db4">Docker host (Docker Desktop / single network)</text>
+
+  <!-- ============ Cowrie ============ -->
+  <g filter="url(#shadow)">
+    <rect x="340" y="250" width="200" height="130" rx="12" fill="#ffffff" stroke="#e08a1e" stroke-width="2"/>
+  </g>
+  <text x="440" y="284" text-anchor="middle" font-size="16" font-weight="700" fill="#e08a1e">Cowrie honeypot</text>
+  <text x="440" y="309" text-anchor="middle" font-size="12.5" fill="#3d4753">fake SSH on :2222</text>
+  <text x="440" y="329" text-anchor="middle" font-size="12.5" fill="#3d4753">poses as web-prod-01</text>
+  <text x="440" y="356" text-anchor="middle" font-size="12" fill="#7a828c">writes cowrie.json</text>
+
+  <!-- ============ Wazuh Manager ============ -->
+  <g filter="url(#shadow)">
+    <rect x="620" y="170" width="220" height="150" rx="12" fill="#ffffff" stroke="#2e9e8f" stroke-width="2"/>
+  </g>
+  <text x="730" y="202" text-anchor="middle" font-size="16" font-weight="700" fill="#2e9e8f">Wazuh manager</text>
+  <text x="730" y="227" text-anchor="middle" font-size="12.5" fill="#3d4753">reads cowrie.json</text>
+  <text x="730" y="247" text-anchor="middle" font-size="12.5" fill="#3d4753">custom rules + decoders</text>
+  <text x="730" y="267" text-anchor="middle" font-size="12.5" fill="#3d4753">MITRE ATT&amp;CK tagging</text>
+  <text x="730" y="293" text-anchor="middle" font-size="12" fill="#7a828c">rules 100100-100111</text>
+
+  <!-- ============ Wazuh Indexer ============ -->
+  <g filter="url(#shadow)">
+    <rect x="620" y="360" width="220" height="90" rx="12" fill="#ffffff" stroke="#3a6ea5" stroke-width="2"/>
+  </g>
+  <text x="730" y="392" text-anchor="middle" font-size="16" font-weight="700" fill="#3a6ea5">Wazuh indexer</text>
+  <text x="730" y="417" text-anchor="middle" font-size="12.5" fill="#3d4753">stores + searches alerts</text>
+  <text x="730" y="436" text-anchor="middle" font-size="12" fill="#7a828c">wazuh-alerts-*</text>
+
+  <!-- ============ Wazuh Dashboard ============ -->
+  <g filter="url(#shadow)">
+    <rect x="900" y="265" width="140" height="140" rx="12" fill="#ffffff" stroke="#6a4ea5" stroke-width="2"/>
+  </g>
+  <text x="970" y="300" text-anchor="middle" font-size="15" font-weight="700" fill="#6a4ea5">Wazuh</text>
+  <text x="970" y="320" text-anchor="middle" font-size="15" font-weight="700" fill="#6a4ea5">dashboard</text>
+  <text x="970" y="346" text-anchor="middle" font-size="12.5" fill="#3d4753">analyst view</text>
+  <text x="970" y="366" text-anchor="middle" font-size="12.5" fill="#3d4753">on :443</text>
+  <text x="970" y="386" text-anchor="middle" font-size="12" fill="#7a828c">+ Cowrie panels</text>
+
+  <!-- ============ arrows ============ -->
+  <!-- attacker -> cowrie -->
+  <line x1="220" y1="310" x2="336" y2="310" stroke="#5b6470" stroke-width="2.2" marker-end="url(#arrow)"/>
+  <text x="278" y="300" text-anchor="middle" font-size="12" fill="#5b6470">SSH :2222</text>
+  <text x="278" y="332" text-anchor="middle" font-size="11" fill="#8a929c">brute force, recon</text>
+
+  <!-- cowrie -> manager (shared log volume) -->
+  <line x1="540" y1="288" x2="616" y2="250" stroke="#5b6470" stroke-width="2.2" marker-end="url(#arrow)"/>
+  <text x="578" y="248" text-anchor="middle" font-size="11.5" fill="#5b6470">cowrie.json</text>
+  <text x="578" y="263" text-anchor="middle" font-size="10.5" fill="#8a929c">shared volume</text>
+
+  <!-- manager -> indexer -->
+  <line x1="730" y1="320" x2="730" y2="356" stroke="#5b6470" stroke-width="2.2" marker-end="url(#arrow)"/>
+  <text x="772" y="343" text-anchor="middle" font-size="11.5" fill="#5b6470">alerts</text>
+
+  <!-- indexer -> dashboard -->
+  <line x1="840" y1="395" x2="896" y2="360" stroke="#5b6470" stroke-width="2.2" marker-end="url(#arrow)"/>
+  <!-- manager -> dashboard (api) -->
+  <line x1="840" y1="225" x2="968" y2="261" stroke="#5b6470" stroke-width="1.6" stroke-dasharray="4 4" marker-end="url(#arrow)"/>
+  <text x="905" y="232" text-anchor="middle" font-size="10.5" fill="#8a929c">API</text>
+
+  <!-- analyst -> dashboard -->
+  <line x1="970" y1="470" x2="970" y2="409" stroke="#5b6470" stroke-width="2.2" marker-end="url(#arrow)"/>
+  <g filter="url(#shadow)">
+    <rect x="905" y="475" width="130" height="60" rx="10" fill="#ffffff" stroke="#5b6470" stroke-width="1.6"/>
+  </g>
+  <text x="970" y="500" text-anchor="middle" font-size="13.5" font-weight="700" fill="#3d4753">Analyst</text>
+  <text x="970" y="520" text-anchor="middle" font-size="11.5" fill="#7a828c">https://localhost</text>
+
+  <!-- ============ flow legend (bottom-left) ============ -->
+  <text x="40" y="430" font-size="13" font-weight="700" fill="#1b2733">Attack chain detected</text>
+  <text x="40" y="455" font-size="12" fill="#3d4753">T1046 scan  ->  T1110 brute force  ->  T1078 valid accounts</text>
+  <text x="40" y="475" font-size="12" fill="#3d4753">->  T1059 shell  ->  T1082/T1033 discovery  ->  T1105 tool transfer</text>
+</svg>

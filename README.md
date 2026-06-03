@@ -8,7 +8,7 @@ single machine — attack it, detect it, document it.
 > **Stack:** Wazuh 4.9 (SIEM) · Cowrie (SSH honeypot) · Docker Compose · Python
 > (paramiko) attacker · MITRE ATT&CK
 
-![Architecture](docs/architecture.png) <!-- add a draw.io export here -->
+![Architecture](docs/architecture.svg)
 
 ---
 
