@@ -85,13 +85,41 @@ Full table: [`docs/MITRE-MAPPING.md`](docs/MITRE-MAPPING.md).
 
 ---
 
-## Screenshots
+## Walkthrough
 
-| | |
-|---|---|
-| Wazuh dashboard | ![](screenshots/01-wazuh-dashboard.png) |
-| Cowrie JSON capture | ![](screenshots/02-cowrie-json.png) |
-| MITRE-tagged alerts | ![](screenshots/03-alerts.png) |
+A run through the lab, from the attack to the detections.
+
+**1. Attack the honeypot.** A brute force against the SSH port, then a login
+with the password that worked, then some poking around. The shell lands on the
+fake host `web-prod-01`.
+
+![Attacking the honeypot over SSH](screenshots/06-attack-terminal.png)
+
+**2. The honeypot records every attempt.** Cowrie writes each login as a line of
+JSON. Here are the failed guesses followed by the successful `root/hunter2`.
+
+![Cowrie JSON log of the login attempts](screenshots/02-cowrie-json_2.png)
+
+**3. Wazuh turns the logs into alerts.** The successful login that follows a
+brute force burst fires the level 12 compromise rule (100105), tagged with the
+MITRE techniques it represents.
+
+![Brute force into compromise alert with MITRE tags](screenshots/03-alerts.png)
+
+**4. Post-access activity is caught too.** The recon commands run inside the
+session map to discovery techniques (100107, T1082 and T1033).
+
+![Recon command alert with MITRE tags](screenshots/03-alerts_2.png)
+
+**5. The dashboard ties it together.** Top source IPs, a MITRE technique
+breakdown, the passwords tried, and the commands run, all scoped to the honeypot.
+
+![Cowrie overview dashboard, top half](screenshots/05-dashboard.png)
+![Cowrie overview dashboard, passwords and commands](screenshots/05-dashboard_2.png)
+
+**6. And it all rolls up to the Wazuh overview.**
+
+![Wazuh overview after the attacks](screenshots/01-wazuh-dashboard.png)
 
 ---
 
