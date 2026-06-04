@@ -1,7 +1,9 @@
 # --- Honeypot SIEM lab ---
 
 # Captured honeypot logs (can contain attacker IPs / payloads; regenerate locally)
-cowrie/log/
+# Ignore the log contents but keep the folder via .gitkeep so the bind mount has a target.
+cowrie/log/*
+!cowrie/log/.gitkeep
 cowrie-logs/
 *.json.log
 
@@ -14,6 +16,13 @@ config/certs/
 *.key
 *.crt
 .env
+
+# Python / tooling
+__pycache__/
+*.pyc
+
+# Claude Code local files
+.claude/
 
 # OS / editor noise
 Thumbs.db

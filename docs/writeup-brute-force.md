@@ -22,7 +22,7 @@ straight from `cowrie.json`:
  "src_ip":"172.18.0.6","message":"login attempt [root/letmein] failed", ...}
 ```
 
-_[screenshot: a handful of failed attempts in cowrie.json]_
+![Failed login attempts in cowrie.json, ending with the successful root/hunter2](../screenshots/02-cowrie-json_2.png)
 
 ## How Wazuh caught it
 
@@ -58,7 +58,7 @@ point where a guess turns into a real foothold:
 20:27:47  rule 100105  level 12  successful login root/hunter2 after   T1078, T1110
 ```
 
-_[screenshot: 100104 and 100105 side by side in the Wazuh alerts view]_
+![The compromise alert in Wazuh: rule 100105 at level 12, tagged T1110 and T1078](../screenshots/04-bruteforce.png)
 
 ## MITRE ATT&CK
 

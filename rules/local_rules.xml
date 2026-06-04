@@ -9,7 +9,7 @@
   Install: copy this file into the manager at
            /var/ossec/etc/rules/local_rules.xml  then restart wazuh-manager.
 
-  Author: <your name>  |  Project: Honeypot SIEM Lab
+  Author: Abhishek Kumar Sahu (themodernhacker)  |  Project: Honeypot SIEM Lab
 -->
 
 <group name="cowrie,honeypot,">

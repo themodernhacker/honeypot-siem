@@ -5,7 +5,7 @@ Docker — Wazuh (SIEM), Cowrie (SSH honeypot), and the log pipeline between the
 No Wazuh agent is installed on the host; the manager reads Cowrie's JSON log
 through a shared volume, which keeps the whole lab reproducible from this repo.
 
-> Run all commands from the repo root: `D:\Projects\Resume_Project`
+> Run all commands from the repo root (the folder you cloned this repo into).
 > Use **PowerShell**. Where a command differs from the original plan it's noted.
 
 ---

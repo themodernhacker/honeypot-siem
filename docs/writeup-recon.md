@@ -31,7 +31,7 @@ so I get one record per command with the exact text the attacker typed:
  "src_ip":"172.18.0.6", ...}
 ```
 
-_[screenshot: the command.input events in cowrie.json]_
+![Recon commands logged as command.input events in cowrie.json](../screenshots/07-cowrie-commands.png)
 
 ## How Wazuh caught it
 
@@ -57,7 +57,7 @@ it fired three times, once each for `uname -a`, `id`, and `cat /etc/passwd`:
 20:27:49  rule 100107  cat /etc/passwd   T1082, T1033
 ```
 
-_[screenshot: three recon alerts in the Wazuh alerts view]_
+![A recon command alert in Wazuh: rule 100107, tagged T1082 and T1033](../screenshots/03-alerts_2.png)
 
 One thing I learned writing this: how Cowrie logs commands depends on how they
 are sent. If you push everything as a single SSH command string they arrive as
