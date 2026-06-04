@@ -26,11 +26,20 @@ import hashlib
 import hmac
 import json
 import os
+import ssl
 import sys
 import urllib.request
 
 LOG_TYPE = "Cowrie"
 API_VERSION = "2016-04-01"
+
+# Some Python builds (e.g. msys2/mingw) ship without a usable CA bundle, which
+# makes HTTPS verification fail. Prefer certifi's bundle when it is installed.
+try:
+    import certifi
+    _SSL_CONTEXT = ssl.create_default_context(cafile=certifi.where())
+except Exception:
+    _SSL_CONTEXT = ssl.create_default_context()
 
 
 def build_signature(workspace_id, key, date, content_length):
@@ -52,7 +61,7 @@ def post(workspace_id, key, body_bytes):
     req.add_header("Log-Type", LOG_TYPE)
     req.add_header("x-ms-date", date)
     req.add_header("time-generated-field", "timestamp")
-    with urllib.request.urlopen(req, timeout=30) as resp:
+    with urllib.request.urlopen(req, timeout=30, context=_SSL_CONTEXT) as resp:
         return resp.status
 
 

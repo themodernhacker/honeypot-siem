@@ -47,6 +47,12 @@ Data Collector API:
 4. Wait a few minutes, then in Sentinel open **Logs** and run `Cowrie_CL` to see
    the rows. Now paste any query from `kql/` and run it.
 
+> Run the script with a Python that has a working CA bundle (the python.org
+> Windows build does; some minimal/msys2 builds do not and fail TLS verification
+> with "certificate verify failed"). The script uses `certifi` automatically if
+> it is installed. On Windows, calling the full path to the official interpreter,
+> for example `C:\Python313\python.exe ingest_cowrie.py ...`, is the simplest fix.
+
 The custom table is called `Cowrie_CL`, and the HTTP Data Collector API suffixes
 fields by type, so `eventid` becomes `eventid_s`, `src_ip` becomes `src_ip_s`,
 and so on. The queries already use those names.
