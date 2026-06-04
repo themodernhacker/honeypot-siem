@@ -1,0 +1,13 @@
+// Detection: a burst of connections from one source (scanning / automation)
+// MITRE ATT&CK: T1046 (Network Service Discovery)
+// Mirrors Wazuh rule 100110.
+//
+// Cowrie only exposes one port, so this is the honeypot-side signal for
+// scanning. The stronger network-scan evidence lives on the attacker side
+// (nmap output); this catches automated tooling hammering the SSH port.
+
+Cowrie_CL
+| where eventid_s == "cowrie.session.connect"
+| summarize Connections = count() by src_ip_s, bin(TimeGenerated, 1m)
+| where Connections >= 12
+| order by Connections desc

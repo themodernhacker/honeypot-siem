@@ -1,5 +1,5 @@
 <!--
-  Cowrie honeypot — custom decoders
+  Cowrie honeypot, custom decoders
   =================================
   Cowrie writes events as one JSON object per line (cowrie.json). Wazuh's
   built-in JSON decoder parses these automatically when the log source is
@@ -8,7 +8,7 @@
   dynamic field that rules can match on directly.
 
   Because the data is already structured JSON, NO regex field-extraction
-  decoder is required — that is the correct engineering choice here, and the
+  decoder is required, that is the correct engineering choice here, and the
   detection logic lives entirely in rules/local_rules.xml.
 
   This file is kept as the place to add decoders if we later ingest a

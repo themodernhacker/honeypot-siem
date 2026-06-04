@@ -4,7 +4,7 @@ Controlled SSH brute-force against the LOCAL Cowrie honeypot.
 
 This is a purple-team exercise against your own honeypot on localhost. It tries
 a tiny wordlist so Wazuh records a burst of failed logins (rule 100104) followed
-by one success (rule 100105). It is intentionally small — the point is to test
+by one success (rule 100105). It is intentionally small, the point is to test
 detection, not to crack anything.
 
 Usage:

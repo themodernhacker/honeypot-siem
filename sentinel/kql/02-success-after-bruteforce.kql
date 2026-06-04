@@ -1,0 +1,19 @@
+// Detection: a successful login from a source that was just brute forcing
+// MITRE ATT&CK: T1078 (Valid Accounts) + T1110 (Brute Force)
+// Mirrors Wazuh rule 100105, the highest-severity alert in the lab.
+//
+// Logic: find sources with 8+ failures, then surface any successful login from
+// the same source inside (or just after) that burst of failures.
+
+let bruteForcers =
+    Cowrie_CL
+    | where eventid_s == "cowrie.login.failed"
+    | summarize Failures = count(), FirstFail = min(TimeGenerated), LastFail = max(TimeGenerated)
+        by src_ip_s
+    | where Failures >= 8;
+Cowrie_CL
+| where eventid_s == "cowrie.login.success"
+| join kind=inner (bruteForcers) on src_ip_s
+| where TimeGenerated between (FirstFail .. (LastFail + 10m))
+| project TimeGenerated, src_ip_s, username_s, password_s, FailuresBefore = Failures
+| order by TimeGenerated desc

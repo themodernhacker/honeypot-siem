@@ -1,0 +1,9 @@
+// Detection: attempt to pull a remote payload onto the honeypot
+// MITRE ATT&CK: T1105 (Ingress Tool Transfer), Command and Control
+// Mirrors Wazuh rule 100108.
+
+Cowrie_CL
+| where eventid_s == "cowrie.command.input"
+| where input_s matches regex @"(?i)\b(wget|curl|tftp|ftpget|scp|fetch)\b"
+| project TimeGenerated, src_ip_s, Command = input_s
+| order by TimeGenerated desc

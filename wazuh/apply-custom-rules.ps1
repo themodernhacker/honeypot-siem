@@ -3,7 +3,7 @@
 # Injects the lab's custom Cowrie decoders + detection rules into the running
 # Wazuh manager, then restarts it so they load. Run this ONCE after the stack
 # is up and healthy. The files land in the manager's named volume (/var/ossec/etc),
-# so they persist across `docker compose restart` and `up -d` — you only need to
+# so they persist across `docker compose restart` and `up -d`, you only need to
 # re-run this after `docker compose down -v` (which wipes volumes).
 #
 # Why a script instead of a bind mount? Bind-mounting files into /var/ossec/etc

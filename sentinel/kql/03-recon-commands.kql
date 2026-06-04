@@ -1,0 +1,9 @@
+// Detection: host discovery / recon commands run inside the honeypot
+// MITRE ATT&CK: T1082 (System Information Discovery), T1033 (System Owner/User Discovery)
+// Mirrors Wazuh rule 100107.
+
+Cowrie_CL
+| where eventid_s == "cowrie.command.input"
+| where input_s matches regex @"(?i)\b(uname|whoami|id|hostname|lscpu|uptime|ifconfig|ip\s+a|netstat|ps|cat\s+/etc/(passwd|shadow|os-release))\b"
+| project TimeGenerated, src_ip_s, Command = input_s
+| order by TimeGenerated desc

@@ -1,4 +1,4 @@
-# Honeypot SIEM — Compose override
+# Honeypot SIEM, Compose override
 # =================================
 # Copy this file into the cloned  wazuh-docker/single-node/  directory.
 # Docker Compose automatically merges docker-compose.override.yml on top of
@@ -22,7 +22,7 @@ services:
     container_name: cowrie
     restart: unless-stopped
     ports:
-      - "2222:2222"          # host:container — attack this from your "attacker" box
+      - "2222:2222"          # host:container, attack this from your "attacker" box
     volumes:
       - ../../cowrie/log:/cowrie/cowrie-git/var/log/cowrie
       - ../../cowrie/etc/cowrie.cfg:/cowrie/cowrie-git/etc/cowrie.cfg:ro

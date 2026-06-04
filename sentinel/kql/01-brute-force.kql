@@ -1,0 +1,16 @@
+// Detection: SSH brute force against the Cowrie honeypot
+// MITRE ATT&CK: T1110 (Brute Force), Credential Access
+// Mirrors Wazuh rule 100104.
+//
+// Column names assume ingestion via the HTTP Data Collector API, which creates
+// a custom table Cowrie_CL and suffixes fields by type (_s string, _t datetime).
+// Adjust the names if you ingest with the newer Logs Ingestion API.
+
+Cowrie_CL
+| where eventid_s == "cowrie.login.failed"
+| summarize
+    FailedAttempts = count(),
+    PasswordsTried = make_set(password_s, 25)
+    by src_ip_s, bin(TimeGenerated, 15m)
+| where FailedAttempts >= 8
+| order by FailedAttempts desc

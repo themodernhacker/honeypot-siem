@@ -1,7 +1,7 @@
-# Setup Guide — Honeypot SIEM Lab (Windows + Docker Desktop)
+# Setup Guide: Honeypot SIEM Lab (Windows + Docker Desktop)
 
 This guide is adapted for **Windows 11 + Docker Desktop**. Everything runs in
-Docker — Wazuh (SIEM), Cowrie (SSH honeypot), and the log pipeline between them.
+Docker, Wazuh (SIEM), Cowrie (SSH honeypot), and the log pipeline between them.
 No Wazuh agent is installed on the host; the manager reads Cowrie's JSON log
 through a shared volume, which keeps the whole lab reproducible from this repo.
 
@@ -10,10 +10,10 @@ through a shared volume, which keeps the whole lab reproducible from this repo.
 
 ---
 
-## Phase 0 — Prep
+## Phase 0: Prep
 
 1. **Start Docker Desktop** and wait until it says *Engine running*.
-2. Give Docker enough memory: **Settings → Resources → Memory ≥ 6 GB** (Wazuh's
+2. Give Docker enough memory: **Settings > Resources > Memory, at least 6 GB** (Wazuh's
    indexer is heavy). 8 GB is comfortable.
 3. Verify:
    ```powershell
@@ -29,7 +29,7 @@ through a shared volume, which keeps the whole lab reproducible from this repo.
 
 ---
 
-## Phase 1 — Stand up Wazuh
+## Phase 1: Stand up Wazuh
 
 ```powershell
 git clone https://github.com/wazuh/wazuh-docker.git -b v4.9.0
@@ -63,7 +63,7 @@ docker compose ps
 > Bind-mounting individual rule files into it makes Docker pre-create those
 > directories, Wazuh then skips its default-config copy, and the manager fails
 > to start (missing `etc/shared/ar.conf`). So we inject the rules *after* the
-> stack is healthy instead — see below.
+> stack is healthy instead, see below.
 
 Wait until the manager is initialised (analysisd running), then load the custom
 Cowrie rules. They land in the named volume and persist across restarts:
@@ -73,17 +73,17 @@ Cowrie rules. They land in the named volume and persist across restarts:
 pwsh wazuh\apply-custom-rules.ps1
 ```
 
-- Wait ~2–3 min, then open **https://localhost** (port 443).
-- Default creds are in the compose file (`admin` / `SecretPassword`) — **change
+- Wait ~2-3 min, then open **https://localhost** (port 443).
+- Default creds are in the compose file (`admin` / `SecretPassword`), **change
   them** before you make the repo public.
-- 📸 **Screenshot** the empty dashboard → `screenshots/01-wazuh-dashboard.png`
+- 📸 **Screenshot** the empty dashboard to `screenshots/01-wazuh-dashboard.png`
 
 **Done when:** You can log into the Wazuh dashboard and `docker compose ps`
 shows `wazuh.manager`, `wazuh.indexer`, `wazuh.dashboard`, and `cowrie` healthy.
 
 ---
 
-## Phase 2 — Verify Cowrie
+## Phase 2: Verify Cowrie
 
 Cowrie came up with the stack (it's in the override). Confirm it's logging:
 
@@ -98,13 +98,13 @@ Check the JSON log appeared:
 Get-Content .\cowrie\log\cowrie.json -Tail 20
 ```
 
-- 📸 **Screenshot** a captured login attempt → `screenshots/02-cowrie-json.png`
+- 📸 **Screenshot** a captured login attempt to `screenshots/02-cowrie-json.png`
 
 **Done when:** `cowrie.json` contains `cowrie.login.failed` events for your test.
 
 ---
 
-## Phase 3 — Confirm the pipeline (Cowrie → Wazuh)
+## Phase 3: Confirm the pipeline (Cowrie to Wazuh)
 
 Our `local_rules.xml` and the manager `<localfile>` are already loaded. Validate
 the rules parsed without error and that alerts flow:
@@ -118,28 +118,28 @@ docker exec -it single-node-wazuh.manager-1 /var/ossec/bin/wazuh-logtest
 Generate a few more logins, then in the dashboard go to **Threat Hunting /
 Discover** and filter `rule.groups: cowrie`.
 
-- 📸 **Screenshot** Cowrie alerts in Wazuh → `screenshots/03-alerts.png`
+- 📸 **Screenshot** Cowrie alerts in Wazuh to `screenshots/03-alerts.png`
 
 **Done when:** Cowrie events show up as Wazuh alerts tagged with `cowrie`.
 
 > Troubleshooting: if no alerts, check `docker logs single-node-wazuh.manager-1`,
 > confirm the localfile path, and that `cowrie/log/cowrie.json` is non-empty.
-> Container names may differ — use `docker compose ps` to get exact names.
+> Container names may differ, use `docker compose ps` to get exact names.
 
 ---
 
-## Phase 4 — Generate attacks
+## Phase 4: Generate attacks
 
 See [`attack/README.md`](../attack/README.md). Run the controlled brute-force,
 scan, and command-execution scripts against `localhost:2222`. This is **your**
-honeypot on **your** machine — standard purple-team practice.
+honeypot on **your** machine, standard purple-team practice.
 
 **Done when:** Wazuh shows alerts from the scan, brute-force (rule 100104), and
-command activity (rules 100106–100108).
+command activity (rules 100106-100108).
 
 ---
 
-## Phase 5 — Detection engineering + MITRE
+## Phase 5: Detection engineering + MITRE
 
 The rules already map to MITRE (see [`MITRE-MAPPING.md`](MITRE-MAPPING.md)).
 Instead of building panels by hand, import the ready-made dashboard:
@@ -160,7 +160,7 @@ for the UI import path and how to rebuild it. Screenshot each panel into
 
 ---
 
-## Phase 6 — Document & ship
+## Phase 6: Document & ship
 
 Fill in [`../README.md`](../README.md), add the architecture diagram, write the
 attack write-ups in `docs/`, then make the GitHub repo public and pin it.
