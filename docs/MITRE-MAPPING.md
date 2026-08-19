@@ -17,7 +17,7 @@ tagged with the MITRE ATT&CK technique it represents. This table is the
 | 100109  | File actually downloaded into honeypot       | T1105, Ingress Tool Transfer | Command & Control | 10 |
 | 100110  | 12+ rapid connections in 60s (automation)    | T1046, Network Service Discovery | Discovery   | 7 |
 | 100111  | Tunnel/proxy attempt through honeypot        | T1090, Proxy | Command & Control     | 9 |
-| 100151  | Recon from a source already flagged compromised (100105) | T1082 + T1033 | Discovery | 12 |
+| 100151  | Recon from a source that just brute-forced in (100104), post-compromise | T1082 + T1033 | Discovery | 12 |
 
 ## Attack-chain story
 
@@ -28,7 +28,7 @@ A realistic Cowrie session walks the ATT&CK kill chain end-to-end:
 3. **T1078**, a guessed credential succeeds; success-after-brute-force fires (100105).
 4. **T1059.004**, they drop into a shell and run commands (100106).
 5. **T1082 / T1033**, recon to understand the host (100107), which escalates to a
-   level 12 page via 100151 because it is recon on an already-compromised source.
+   level 12 page via 100151 because it comes from a source that just brute-forced in.
 6. **T1105**, they pull down a second-stage payload (100108 / 100109).
 
 > Note on T1046: Cowrie only exposes port 2222, so the strongest network-scan

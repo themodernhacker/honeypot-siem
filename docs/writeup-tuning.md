@@ -77,8 +77,8 @@ to test it against. The tempting version is to turn the recon alert right down,
 but that risks going blind to recon that arrives some other way (stolen key, a
 different vector), so instead, with Move 1's allowlist already stripping out the
 routine admin noise, I left 100107 at its review-worthy level 8 and layered a
-higher-severity rule on top that only fires when recon follows the compromise
-alert (100105) from the same source inside ten minutes:
+higher-severity rule on top that fires when recon comes from a source that just
+tripped the brute-force burst rule (100104):
 
 ```xml
 <!-- 100107 stays a review-level recon alert (level 8, unchanged) -->
@@ -86,21 +86,32 @@ alert (100105) from the same source inside ten minutes:
 <!-- ... and this escalates it to a page when the recon is post-compromise -->
 <rule id="100151" level="12" timeframe="600">
   <if_sid>100107</if_sid>
-  <if_matched_sid>100105</if_matched_sid>
+  <if_matched_sid>100104</if_matched_sid>
   <same_field>src_ip</same_field>
-  <description>Cowrie: recon from $(src_ip) that already tripped post-brute-force compromise (100105), escalating.</description>
+  <description>Cowrie: recon from $(src_ip) after a brute-force burst (100104), likely post-compromise enumeration, escalating.</description>
   <mitre><id>T1082</id><id>T1033</id></mitre>
 </rule>
 ```
 
 That gives a severity ladder instead of one flat alert: recon on its own stays a
-level 8 "go look at this" signal, and recon from a source I have already confirmed
-compromised jumps to level 12 to page, because at that point it is not someone
-poking around, it is an attacker enumerating a box they just broke into. It is the
-same composite pattern the compromise rule itself uses (`if_sid` plus
-`if_matched_sid` plus `same_field`), and the detection-as-code suite in
-[`../tests/`](../tests/) has a case that feeds a full brute-force-then-recon burst
-through `wazuh-logtest` and asserts 100151 actually fires.
+level 8 "go look at this" signal, and recon from a source that just brute-forced
+the box jumps to level 12 to page. Recon only happens inside a shell, and a shell
+means they got in, so brute-force plus in-shell recon from the same source is an
+attacker enumerating a box they just forced their way into, not someone poking
+around.
+
+There is a real detection-engineering lesson buried in that rule, and the
+detection-as-code suite in [`../tests/`](../tests/) is what surfaced it. I first
+wrote 100151 to key off the compromise alert (100105), which reads more naturally.
+The test that feeds a full brute-force-then-recon burst through `wazuh-logtest`
+then failed: 100151 never fired. The reason is a Wazuh correlation subtlety.
+`if_matched_sid` looks back over frequency rules like 100104, but 100105 is itself
+a composite that only fires via `if_matched_sid`, and a rule like that does not go
+into the lookback the same way. Anchoring on 100104 instead captures the identical
+scenario (same source, brute force then a shell) and actually fires. Without a test
+that asserts the rule ID, I would have shipped an escalation rule that silently
+never triggered, which is exactly the failure mode detection-as-code exists to
+catch.
 
 ## Move 3: tune the thresholds and keep tuning them
 

@@ -103,19 +103,26 @@
     </mitre>
   </rule>
 
-  <!-- ===== Context escalation: recon AFTER a confirmed compromise =====
+  <!-- ===== Context escalation: recon by a source that just brute-forced =====
        100107 above stays at level 8 (a recon command is always worth a look).
        This rule adds a severity ladder on top of it: when recon comes from a
-       source that just tripped the post-brute-force compromise rule (100105)
-       inside the last 10 minutes, that is no longer "someone poking around", it
-       is a confirmed attacker enumerating a box they just broke into, so it
-       escalates to level 12 to page. Same composite pattern as 100105 itself
-       (if_sid + if_matched_sid + same_field). See docs/writeup-tuning.md. -->
+       source that also tripped the brute-force burst rule (100104) inside the
+       last 10 minutes, that is no longer "someone poking around". Recon only
+       happens inside a shell, and a shell means they got in, so brute-force plus
+       in-shell recon from one source is an attacker enumerating a box they just
+       forced their way into. Escalate to level 12 to page.
+
+       Note: this anchors on 100104, NOT on the compromise rule 100105, and that
+       is deliberate. I first keyed it on 100105 and the detection-as-code test
+       in tests/ caught that it never fired. Wazuh's if_matched_sid correlates
+       against frequency rules like 100104, not against a composite rule (100105)
+       that itself fired via if_matched_sid. Anchoring on 100104 captures the same
+       scenario and actually fires. See docs/writeup-tuning.md. -->
   <rule id="100151" level="12" timeframe="600">
     <if_sid>100107</if_sid>
-    <if_matched_sid>100105</if_matched_sid>
+    <if_matched_sid>100104</if_matched_sid>
     <same_field>src_ip</same_field>
-    <description>Cowrie: recon from $(src_ip) that already tripped post-brute-force compromise (100105), escalating.</description>
+    <description>Cowrie: recon from $(src_ip) after a brute-force burst (100104), likely post-compromise enumeration, escalating.</description>
     <mitre>
       <id>T1082</id>       <!-- System Information Discovery -->
       <id>T1033</id>       <!-- System Owner/User Discovery -->

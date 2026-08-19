@@ -79,11 +79,12 @@ get in, immediately enumerate the host, is a real attacker working through their
 checklist. So I want to tie this back to the same source as the compromise alert
 and treat the whole thing as one incident rather than a stack of separate low
 level events. I actually built that instinct into the ruleset: rule 100151 takes
-a recon command from a source that just tripped the post-brute-force compromise
-rule (100105) and escalates it from a review-level 8 to a level 12 page, because
-recon on a box you have just confirmed compromised is a different animal from
-recon in isolation. The story is what sells it, and that is the whole reason for
-mapping each step to ATT&CK.
+a recon command from a source that just tripped the brute-force burst rule (100104)
+and escalates it from a review-level 8 to a level 12 page, because recon from a
+source that just forced its way in is a different animal from recon in isolation.
+(Getting that rule to fire taught me a Wazuh correlation quirk, which I wrote up in
+[the tuning notes](writeup-tuning.md).) The story is what sells it, and that is the
+whole reason for mapping each step to ATT&CK.
 
 The flip side is that the base recon rule still needs real tuning before it goes
 anywhere near a production box, because `uname` and `id` are also everyday admin

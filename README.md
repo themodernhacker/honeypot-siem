@@ -91,7 +91,7 @@ python run_session.py
 | Successful login after brute force | T1078 + T1110 | 100105 |
 | Remote payload download (`wget`/`curl`) | T1105 | 100108/109 |
 | Recon commands (`uname`,`id`,...) | T1082 + T1033 | 100107 |
-| Recon *after* a confirmed compromise (escalation) | T1082 + T1033 | 100151 |
+| Recon by a source that just brute-forced in (escalation) | T1082 + T1033 | 100151 |
 | Rapid connections / automation | T1046 | 100110 |
 | Tunnel/proxy via honeypot | T1090 | 100111 |
 
@@ -159,6 +159,13 @@ Real engineering problems I hit and solved while building this (not theory):
   dynamic field `src_ip`, so my brute-force correlation silently never fired
   until I switched to `<same_field>src_ip</same_field>`. Lesson: verify which
   field your correlation actually keys on.
+- **My own test caught a detection that silently never fired.** I wrote the
+  context-escalation rule (100151) to key off the *compromise* alert (100105), and
+  the detection-as-code test asserting its rule ID failed. Wazuh's `if_matched_sid`
+  looks back over frequency rules like the brute-force rule (100104), but not over
+  a composite that itself fired via `if_matched_sid` (100105). Re-anchoring on
+  100104 fixed it. Lesson: assert on rule IDs, not just "an alert fired", or a dead
+  rule looks identical to a working one.
 - **Bind-mounting into a Docker named volume can break app init.** Mounting rule
   files into `/var/ossec/etc` made Wazuh think the volume was already populated
   and skip copying its default config, so the manager wouldn't start. Fixed by
