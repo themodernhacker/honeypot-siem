@@ -125,13 +125,20 @@ session map to discovery techniques (100107, T1082 and T1033).
 
 ![Recon command alert with MITRE tags](screenshots/03-alerts_2.png)
 
-**5. The dashboard ties it together.** Top source IPs, a MITRE technique
+**5. Recon after a break-in escalates on its own.** Those same discovery commands,
+when they come from a source that just brute-forced its way in, promote from a
+level 8 review signal to a level 12 page via rule 100151, so post-compromise
+enumeration stands out from the routine kind.
+
+![Recon escalated to a level 12 page by rule 100151](screenshots/09-recon-escalation.png)
+
+**6. The dashboard ties it together.** Top source IPs, a MITRE technique
 breakdown, the passwords tried, and the commands run, all scoped to the honeypot.
 
 ![Cowrie overview dashboard, top half](screenshots/05-dashboard.png)
 ![Cowrie overview dashboard, passwords and commands](screenshots/05-dashboard_2.png)
 
-**6. And it all rolls up to the Wazuh overview.**
+**7. And it all rolls up to the Wazuh overview.**
 
 ![Wazuh overview after the attacks](screenshots/01-wazuh-dashboard.png)
 
