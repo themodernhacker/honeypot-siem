@@ -15,6 +15,12 @@ frequency-based correlation (brute force, account takeover) and context-based
 escalation (recon on an already-compromised host), all validated end-to-end
 against live simulated attacks.
 
+> **Companion project:** [`incident-investigation-report`](https://github.com/themodernhacker/incident-investigation-report)
+> takes the alerts these rules produce and works them into a full SOC incident
+> investigation (NIST SP 800-61). This repo is the detection engineering; that one
+> is the investigation an analyst files after the detections fire. Detection to
+> investigation, the two halves of the SOC workflow.
+
 ![Architecture](docs/architecture.svg)
 
 ---
