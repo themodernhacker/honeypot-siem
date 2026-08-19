@@ -8,11 +8,12 @@ single machine, attack it, detect it, document it.
 > **Stack:** Wazuh 4.9 (SIEM) · Cowrie (SSH honeypot) · Docker Compose · Python
 > (paramiko) attacker · MITRE ATT&CK · Microsoft Sentinel + KQL (bonus)
 
-**Coverage at a glance:** 11 custom Wazuh detection rules mapped to **9 MITRE
+**Coverage at a glance:** 12 custom Wazuh detection rules mapped to **9 MITRE
 ATT&CK techniques across 6 tactics** (Lateral Movement, Credential Access,
 Initial Access, Execution, Discovery, Command & Control), including
-frequency-based correlation for brute force and post-compromise account
-takeover, all validated end-to-end against live simulated attacks.
+frequency-based correlation (brute force, account takeover) and context-based
+escalation (recon on an already-compromised host), all validated end-to-end
+against live simulated attacks.
 
 ![Architecture](docs/architecture.svg)
 
@@ -20,8 +21,9 @@ takeover, all validated end-to-end against live simulated attacks.
 
 ## What this demonstrates
 
-- **Detection engineering**: 11 custom Wazuh rules with frequency-based
-  correlation (brute force, post-brute-force compromise), in version control:
+- **Detection engineering**: 12 custom Wazuh rules with frequency-based
+  correlation and context-based escalation (brute force, post-brute-force
+  compromise, recon on a compromised host), in version control:
   [`rules/local_rules.xml`](rules/local_rules.xml)
 - **MITRE ATT&CK mapping**: every alert tagged to a technique:
   [`docs/MITRE-MAPPING.md`](docs/MITRE-MAPPING.md)
@@ -89,6 +91,7 @@ python run_session.py
 | Successful login after brute force | T1078 + T1110 | 100105 |
 | Remote payload download (`wget`/`curl`) | T1105 | 100108/109 |
 | Recon commands (`uname`,`id`,...) | T1082 + T1033 | 100107 |
+| Recon *after* a confirmed compromise (escalation) | T1082 + T1033 | 100151 |
 | Rapid connections / automation | T1046 | 100110 |
 | Tunnel/proxy via honeypot | T1090 | 100111 |
 

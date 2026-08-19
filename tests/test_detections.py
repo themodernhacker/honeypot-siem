@@ -88,6 +88,10 @@ CASES = [
     ("success straight after brute force", 100105,
         [failed(p) for p in ("admin", "password", "123456", "12345", "root",
                              "toor", "qwerty", "letmein")] + [success("hunter2")]),
+    ("recon after compromise escalates to a page", 100151,
+        [failed(p) for p in ("admin", "password", "123456", "12345", "root",
+                             "toor", "qwerty", "letmein")]
+        + [success("hunter2"), command("uname -a")]),
     ("rapid connections (scan/automation)", 100110,
         [connect(40010 + i) for i in range(12)]),
 ]

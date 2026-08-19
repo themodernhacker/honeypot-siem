@@ -20,8 +20,8 @@ that into something you can re-run on every change.
   command (100107), payload download (100108).
 - **Stateful correlation rules**: it feeds a whole burst in one `wazuh-logtest`
   session so the frequency counters accumulate, then asserts the brute-force rule
-  (100104), success-after-brute-force (100105), and rapid-connection (100110)
-  fire.
+  (100104), success-after-brute-force (100105), rapid-connection (100110), and the
+  context escalation (100151, recon on an already-compromised source) all fire.
 
 The synthetic events use a TEST-NET-3 source address (`203.0.113.7`, RFC 5737) so
 it is obvious at a glance that they are crafted fixtures, not captured traffic.
@@ -55,7 +55,7 @@ Detection tests against manager 'single-node-wazuh.manager-1'
   [PASS]  rule 100101  <-  new SSH connection
   [PASS]  rule 100102  <-  failed login
   ...
-  10 passed, 0 failed, 10 total
+  11 passed, 0 failed, 11 total
 ```
 
 Exit codes: `0` all passed, `1` an assertion failed (a detection regressed), `2`

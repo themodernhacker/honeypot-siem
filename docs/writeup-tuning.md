@@ -66,36 +66,41 @@ git so every exception has an author and a reason attached to it.
 
 ## Move 2: alert on context, not on the bare command
 
-A single `id` is not an incident. An `id` run three seconds after a login that
-came straight off a brute-force burst is. The command is the same, the context is
-everything, and the context is exactly what the earlier correlation rules already
+A single `id` is not a 3am page. An `id` run three seconds after a login that came
+straight off a brute-force burst is. The command is identical, the context is
+everything, and that context is exactly what the earlier correlation rules already
 capture.
 
-So instead of paging on 100107 by itself, I would drop 100107 to a quiet "watch"
-level and add a composite rule that only escalates when recon follows the
-compromise alert (100105) from the same source inside a short window:
+Unlike Move 1, this one I actually wired into the lab (rule 100151), because the
+attack scripts already produce recon-after-compromise so there is something real
+to test it against. The tempting version is to turn the recon alert right down,
+but that risks going blind to recon that arrives some other way (stolen key, a
+different vector), so instead, with Move 1's allowlist already stripping out the
+routine admin noise, I left 100107 at its review-worthy level 8 and layered a
+higher-severity rule on top that only fires when recon follows the compromise
+alert (100105) from the same source inside ten minutes:
 
 ```xml
-<!-- 100107 becomes a low-noise watch signal ... -->
-<rule id="100107" level="3">
-  ...
-</rule>
+<!-- 100107 stays a review-level recon alert (level 8, unchanged) -->
 
-<!-- ... and this is the one that actually pages -->
+<!-- ... and this escalates it to a page when the recon is post-compromise -->
 <rule id="100151" level="12" timeframe="600">
   <if_sid>100107</if_sid>
   <if_matched_sid>100105</if_matched_sid>
   <same_field>src_ip</same_field>
-  <description>Recon from $(src_ip), which was just flagged for post-brute-force compromise. Escalating.</description>
+  <description>Cowrie: recon from $(src_ip) that already tripped post-brute-force compromise (100105), escalating.</description>
   <mitre><id>T1082</id><id>T1033</id></mitre>
 </rule>
 ```
 
-Now the loud alert only goes off for the pattern that actually matters, someone
-who guessed their way in and is immediately enumerating the host, which is the
-same attack story the write-ups tell. Standalone recon still gets recorded at
-level 3 so it is there when an analyst is reconstructing a session, it just does
-not wake anyone up on its own.
+That gives a severity ladder instead of one flat alert: recon on its own stays a
+level 8 "go look at this" signal, and recon from a source I have already confirmed
+compromised jumps to level 12 to page, because at that point it is not someone
+poking around, it is an attacker enumerating a box they just broke into. It is the
+same composite pattern the compromise rule itself uses (`if_sid` plus
+`if_matched_sid` plus `same_field`), and the detection-as-code suite in
+[`../tests/`](../tests/) has a case that feeds a full brute-force-then-recon burst
+through `wazuh-logtest` and asserts 100151 actually fires.
 
 ## Move 3: tune the thresholds and keep tuning them
 
