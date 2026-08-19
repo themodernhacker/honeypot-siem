@@ -80,3 +80,10 @@ checklist. So I would tie this back to the same session and source as the
 compromise alert and treat the whole thing as one incident rather than a stack
 of separate low level events. The story is what sells it, and that is the whole
 reason for mapping each step to ATT&CK.
+
+The flip side is that this rule needs real tuning before it goes anywhere near a
+production box, because `uname` and `id` are also everyday admin and automation
+commands. I pulled that thread out into its own write-up rather than clutter this
+one: see [Tuning the detections for the real world](writeup-tuning.md) for how I
+would allowlist known admin hosts, escalate recon only when it follows a
+compromise, and keep the whole thing honest about false positives.

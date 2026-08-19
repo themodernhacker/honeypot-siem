@@ -60,6 +60,18 @@ point where a guess turns into a real foothold:
 
 ![The compromise alert in Wazuh: rule 100105 at level 12, tagged T1110 and T1078](../screenshots/04-bruteforce.png)
 
+One honest caveat about rule 100105: it ties the success to the burst on source
+IP alone, not on the username. In the honeypot every hit is an attacker so it
+does not matter, but on a real network a single NAT or shared egress IP could
+carry one person fumbling their password and a different, legitimate person
+logging in a moment later, and the rule would call that a compromise. The fix is
+to also key the correlation on username so the failures and the success have to
+be the same account. The catch is that this would miss spray-and-pray attackers
+who flood many accounts and get in on a different one, so the grown-up answer is
+to run both, the strict IP+username version to page someone and the looser
+IP-only version as a quieter "go look at this source" flag. I walk through
+staging that kind of tuning in [`writeup-tuning.md`](writeup-tuning.md).
+
 ## MITRE ATT&CK
 
 - T1110 Brute Force (the failed login flood)

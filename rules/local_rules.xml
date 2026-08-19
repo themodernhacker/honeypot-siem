@@ -60,7 +60,17 @@
     </mitre>
   </rule>
 
-  <!-- ===== Correlation: success right after brute force (account compromise) ===== -->
+  <!-- ===== Correlation: success right after brute force (account compromise) =====
+       Limitation: this correlates purely on <same_field>src_ip</same_field>, not
+       on username. On a real estate a single NAT'd or shared egress IP can carry
+       two different legitimate users, one fat-fingering their password several
+       times (firing 100104) and another logging in fine seconds later, which
+       would false-positive as a compromise. To tighten in production, also key on
+       username so the burst and the success have to belong to the same account.
+       The trade-off is that spray-and-pray attackers who flood many accounts and
+       win on a different one would then slip past, so on a real fleet I would run
+       both: the strict IP+username rule to page, and this looser IP-only rule as a
+       lower-severity "review this source" signal. -->
   <rule id="100105" level="12">
     <if_sid>100103</if_sid>
     <if_matched_sid>100104</if_matched_sid>

@@ -4,6 +4,13 @@
 //
 // Logic: find sources with 8+ failures, then surface any successful login from
 // the same source inside (or just after) that burst of failures.
+//
+// Limitation (same as Wazuh rule 100105): this joins on src_ip_s only, not on
+// the username. A single NAT'd or shared egress IP could carry one user failing
+// a lot and a different user succeeding, which would show up here as a "compromise"
+// that never happened. To tighten, add username_s to the join key so the failure
+// burst and the success have to be the same account, at the cost of missing
+// spray-and-pray where the winning account differs from the flooded one.
 
 let bruteForcers =
     Cowrie_CL

@@ -8,6 +8,12 @@ single machine, attack it, detect it, document it.
 > **Stack:** Wazuh 4.9 (SIEM) · Cowrie (SSH honeypot) · Docker Compose · Python
 > (paramiko) attacker · MITRE ATT&CK · Microsoft Sentinel + KQL (bonus)
 
+**Coverage at a glance:** 11 custom Wazuh detection rules mapped to **9 MITRE
+ATT&CK techniques across 6 tactics** (Lateral Movement, Credential Access,
+Initial Access, Execution, Discovery, Command & Control), including
+frequency-based correlation for brute force and post-compromise account
+takeover, all validated end-to-end against live simulated attacks.
+
 ![Architecture](docs/architecture.svg)
 
 ---
@@ -25,6 +31,9 @@ single machine, attack it, detect it, document it.
   the resulting alerts: [`attack/`](attack/)
 - **Cross-SIEM detections**: the same rules rewritten in KQL for Microsoft
   Sentinel: [`sentinel/`](sentinel/)
+- **Detection-as-code testing**: a test suite that replays events through
+  `wazuh-logtest` and asserts the right rule fires, so a rule change can't
+  silently break a detection: [`tests/`](tests/)
 
 ---
 
@@ -133,6 +142,8 @@ analyst does next) lives in [`docs/`](docs):
 - [Brute force into an account takeover](docs/writeup-brute-force.md)
 - [Looking around after getting in](docs/writeup-recon.md)
 - [Pulling down a second stage](docs/writeup-payload-download.md)
+- [Tuning the detections for the real world](docs/writeup-tuning.md) (separating
+  signal from noise: allowlisting, context-based escalation, false positives)
 
 ---
 
@@ -168,8 +179,9 @@ rules/      custom Wazuh decoders + detection rules (the core artifact)
 cowrie/     honeypot config (cowrie.cfg, userdb.txt) + logs (gitignored)
 wazuh/      compose override + manager config snippet
 attack/     controlled attack scripts (brute force, session, scan)
-docs/       setup guide, MITRE mapping, attack write-ups
+docs/       setup guide, MITRE mapping, attack write-ups, detection tuning
 sentinel/   the same detections in KQL for Microsoft Sentinel (bonus)
+tests/      detection-as-code: replay events through wazuh-logtest, assert rule IDs
 screenshots/ evidence for the README
 ```
 

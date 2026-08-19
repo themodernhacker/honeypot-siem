@@ -33,3 +33,14 @@ A realistic Cowrie session walks the ATT&CK kill chain end-to-end:
 > evidence lives in the attacker-side `nmap` output and the rapid-connection
 > rule (100110), not in a multi-port signature. This is called out honestly in
 > the write-ups rather than overstated.
+
+> Note on 100105 (success after brute force): the rule correlates on `src_ip`
+> alone, not on the username. Behind a single NAT or shared egress IP, one user
+> could fumble their password enough to trip 100104 while a different, legitimate
+> user logs in seconds later, and the rule would read that as a compromise. In
+> production I would also key the correlation on username so the burst and the
+> success belong to the same account. The honest trade-off: that stricter rule
+> would miss spray-and-pray attackers who flood many accounts and succeed on a
+> different one, so the mature answer is to run both, IP+username to page and
+> IP-only as a lower-severity "review this source" signal. See
+> [`writeup-tuning.md`](writeup-tuning.md) for how I would stage that.
