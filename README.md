@@ -15,11 +15,13 @@ frequency-based correlation (brute force, account takeover) and context-based
 escalation (recon on an already-compromised host), all validated end-to-end
 against live simulated attacks.
 
-> **Companion project:** [`incident-investigation-report`](https://github.com/themodernhacker/incident-investigation-report)
-> takes the alerts these rules produce and works them into a full SOC incident
-> investigation (NIST SP 800-61). This repo is the detection engineering; that one
-> is the investigation an analyst files after the detections fire. Detection to
-> investigation, the two halves of the SOC workflow.
+> **Part of a three-project SOC workflow.** This repo is the **detection
+> engineering**. Its alerts feed
+> [`soar-triage`](https://github.com/themodernhacker/soar-triage), the
+> **automated first-response** that enriches, decides, and files a ticket the
+> instant an alert fires; and the tickets worth a closer look become a full
+> [`incident-investigation-report`](https://github.com/themodernhacker/incident-investigation-report)
+> (NIST SP 800-61). Detection to automated triage to investigation.
 
 ![Architecture](docs/architecture.svg)
 
